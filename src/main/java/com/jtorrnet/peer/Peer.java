@@ -19,4 +19,15 @@ public class Peer {
         this.name = name;
         this.shartedFiles = new ArrayList<File>();
     }
+
+
+    @Override
+    public String toString() {
+        return "Peer{" +
+                "uuid=" + uuid +
+                ", port=" + port +
+                ", ip='" + ip + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }
