@@ -1,17 +1,20 @@
 package com.jtorrnet.peer;
 
-import java.io.BufferedReader;
+import com.jtorrnet.models.message.Message;
+import com.jtorrnet.models.message.MessageTypes;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server implements Runnable{
+public class Server implements Runnable {
 
 
     ServerSocket serverSocket;
     boolean running = true;
+
     public Server(final int PORT) throws IOException {
         serverSocket = new ServerSocket(PORT);
     }
@@ -19,19 +22,31 @@ public class Server implements Runnable{
     @Override
     public void run() {
         System.out.println("Starting the server ...");
-        while(running) {
+        while (running) {
             try {
                 Socket socket = serverSocket.accept();
 
 
                 InputStream in = socket.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                ObjectInputStream objectInputStream = new ObjectInputStream(in);
+                Object obj = objectInputStream.readObject();
+                Message msg = (Message) obj;
 
-                String text = reader.readLine();
-                System.out.println("PEER MSG: "+text);
+                System.out.println("Recieved MessageType " + msg.getType());
+                if(msg.getType().equals(MessageTypes.ECHO)){
+                    System.out.println(msg.getText());
+                }
+
+//                String text = reader.readLine();
+//                System.out.println("PEER MSG: "+text);
+
+
                 in.close();
                 socket.close();
             } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }

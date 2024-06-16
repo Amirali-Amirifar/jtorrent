@@ -1,13 +1,13 @@
 package com.jtorrnet;
 
 import com.jtorrnet.controller.CommandLine;
+import com.jtorrnet.models.message.Message;
+import com.jtorrnet.models.message.MessageTypes;
 import com.jtorrnet.peer.Peer;
 import com.jtorrnet.peer.Server;
 import com.jtorrnet.tracker.Tracker;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 
@@ -31,20 +31,19 @@ public class Client {
 //            PrintWriter pw = new PrintWriter(s.getOutputStream());
 //            pw.println("I am connected to " + ip + ":" + port);
             OutputStream out = socket.getOutputStream();
-            PrintWriter printWriter = new PrintWriter(out);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
 
-            printWriter.println(socket);
-            printWriter.flush();
-            printWriter.close();
+            Message msg = new Message(MessageTypes.ECHO, "Hello I am from local port " + socket.getLocalAddress());
 
+            objectOutputStream.writeObject(msg);
+            objectOutputStream.flush();
             socket.close();
-
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         finally {
-            System.out.println("Connection established");
+            System.out.println("message sent.");
         }
         // Start listen
     }
