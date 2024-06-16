@@ -4,14 +4,22 @@ import com.jtorrnet.Client;
 import com.jtorrnet.controller.validation.PeerValidation;
 import com.jtorrnet.peer.Peer;
 
+import javax.xml.validation.Validator;
 import java.util.Scanner;
 import java.util.UUID;
 
 public class CommandLine {
     // Handles the user interactions with the CLI.
+
+    private final Client client;
+    private final Scanner scanner = new Scanner(System.in);
+
+    public CommandLine(Client client) {
+        this.client = client;
+    }
+
     public void run() {
 
-        Scanner scanner = new Scanner(System.in);
         String command = "";
 
         boolean runLoop = true;
@@ -21,16 +29,13 @@ public class CommandLine {
 
 
             switch (command) {
-                case "whoami" -> {
-                    Commands.runWhoami();
-                }
-
-                case "run-tracker" -> {
-                    Commands.runTracker();
-                }
+                case "whoami" -> Commands.runWhoami();
+                case "run-normal" -> Commands.runNormal(client);
+                case "run-tracker" -> Commands.runTracker(client);
                 case "help" -> {
                     System.out.println("Available commands:");
                     System.out.println("  whoami \t \t get information about yourself on the network as a peer.");
+                    System.out.println("  run-normal \t \t connect to an available tracker peer. ");
                     System.out.println("  run-tracker \t \t run client with tracker enabled.");
                     System.out.println("  help");
                     System.out.println("  exit");
@@ -45,10 +50,10 @@ public class CommandLine {
 
 
     private static class Commands {
-        public static void runTracker() {
+        private final static Scanner scanner = new Scanner(System.in);
+        public static void runTracker(Client client) {
             System.out.println("initializing peer with tracker enabled");
 
-            Scanner scanner = new Scanner(System.in);
 
             System.out.println("Enter port number to be used ");
             int portNumber = scanner.nextInt();
@@ -62,6 +67,7 @@ public class CommandLine {
 
             if (PeerValidation.validate(peer)) {
                 Client.peer = peer;
+                client.startTracker(portNumber); //implement
             } else {
 
                 System.out.println("We are sorry but something went wrong.");
@@ -77,7 +83,18 @@ public class CommandLine {
                 System.out.println(peer);
             }
         }
+
+        public static void runNormal(Client client) {
+            System.out.println("Enter the tracker address <IP>:<PORT>");
+            String address = new Scanner(System.in).nextLine();
+            String ip = address.split(":")[0];
+            String port = address.split(":")[1];
+
+
+            client.startPeer(ip, port);
+
+
+            System.out.println("Initializing the connection. ");
+        }
     }
-
-
 }

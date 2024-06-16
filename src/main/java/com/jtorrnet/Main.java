@@ -8,8 +8,6 @@ public class Main {
     public static void main(String[] args) {
 
         // run a new CommandLine
-        CommandLine commandLine = new CommandLine();
-        commandLine.run();
-
+        Client session = new Client();
     }
 }
