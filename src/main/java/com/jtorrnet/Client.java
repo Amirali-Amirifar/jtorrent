@@ -33,10 +33,16 @@ public class Client {
             OutputStream out = socket.getOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
 
-            Message msg = new Message(MessageTypes.ECHO, "Hello I am from local port " + socket.getLocalAddress());
+            Message msg = new Message(MessageTypes.LIST_FILES, "Hello I am from local port " + socket.getLocalAddress());
 
             objectOutputStream.writeObject(msg);
             objectOutputStream.flush();
+
+
+            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+            Object obj = objectInputStream.readObject();
+            msg = (Message) obj;
+            System.out.println(msg.getText());
             socket.close();
         }
         catch (Exception e) {
@@ -50,8 +56,11 @@ public class Client {
 
     public void startTracker(final int PORT) {
         // Start tracking server.
+        tracker = new Tracker();
+
         try {
             Server s =new Server(PORT);
+            s.setTracker(this.tracker);
             Thread t = new Thread(s);
             t.start();
         } catch (IOException e) {

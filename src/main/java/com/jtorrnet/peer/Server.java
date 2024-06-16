@@ -2,10 +2,12 @@ package com.jtorrnet.peer;
 
 import com.jtorrnet.models.message.Message;
 import com.jtorrnet.models.message.MessageTypes;
+import com.jtorrnet.tracker.Tracker;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -13,6 +15,7 @@ public class Server implements Runnable {
 
 
     ServerSocket serverSocket;
+    Tracker tracker;
     boolean running = true;
 
     public Server(final int PORT) throws IOException {
@@ -34,10 +37,17 @@ public class Server implements Runnable {
                 Message msg = (Message) obj;
 
                 System.out.println("Recieved MessageType " + msg.getType());
-                if(msg.getType().equals(MessageTypes.ECHO)){
+                if (msg.getType().equals(MessageTypes.ECHO)) {
                     System.out.println(msg.getText());
                 }
 
+
+                if (msg.getType().equals(MessageTypes.LIST_FILES)) {
+                    String text = tracker.getFileNames();
+                    ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                    objectOutputStream.writeObject(new Message(MessageTypes.LIST_FILES, text));
+
+                }
 //                String text = reader.readLine();
 //                System.out.println("PEER MSG: "+text);
 
@@ -52,5 +62,9 @@ public class Server implements Runnable {
         }
 
         System.out.println("Server out of run");
+    }
+
+    public void setTracker(Tracker tracker) {
+        this.tracker = tracker;
     }
 }
