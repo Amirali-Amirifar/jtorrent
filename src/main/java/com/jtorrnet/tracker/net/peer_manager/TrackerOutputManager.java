@@ -19,7 +19,7 @@ public class TrackerOutputManager extends Thread{
             try {
                 Thread.sleep(20_000);
             } catch (InterruptedException e) {
-                System.out.println(e);
+                this.interrupt();
                 return;
             }
         }
