@@ -9,7 +9,8 @@ public class TrackerStreamManager {
         TrackerInputManager peerInputManager = new TrackerInputManager(socket);
         peerInputManager.start();
         // Run PeerOutputManager
-
+        TrackerOutputManager peerOutputManager = new TrackerOutputManager(socket);
+        peerOutputManager.start();
 
     }
 }

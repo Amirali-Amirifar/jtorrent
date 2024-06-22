@@ -25,8 +25,11 @@ public class TrackerOutputManager extends Thread{
                 outputStreamWriter.println("I am connected, " + peerSocket + " Time: " + new Date(System.currentTimeMillis()).getTime());
                 outputStreamWriter.flush();
                 Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                System.out.println("Failed - " + e);
+                if(peerSocket.isClosed())
+                    throw new IOException("Connection closed to " + peerSocket);
+
+            } catch (InterruptedException | IOException e) {
+                System.out.println(e);
                 return;
             }
         }
