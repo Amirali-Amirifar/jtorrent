@@ -10,6 +10,7 @@ public class TrackerInputManager extends Thread {
     private final Socket peerSocket;
     private final InputStream socketInputStream;
     private final BufferedReader socketBufferedReader;
+    private TrackerStreamManager trackerStreamManager;
 
     public TrackerInputManager(Socket peer) throws IOException {
         this.peerSocket = peer;
@@ -25,7 +26,7 @@ public class TrackerInputManager extends Thread {
 
                 String line = socketBufferedReader.readLine();
 
-                if(line == null)
+                if (line == null)
                     throw new IOException("Disconnected from the socket. " + peerSocket);
 
                 System.out.println(peerSocket.isClosed() + " Has said " + line);
@@ -36,5 +37,11 @@ public class TrackerInputManager extends Thread {
             }
         }
         System.out.println("Info (PeerInputReader): disconnected from " + peerSocket);
+
+        trackerStreamManager.handleOnDisconnected();
+    }
+
+    public void addStreamManager(TrackerStreamManager trackerStreamManager) {
+        this.trackerStreamManager = trackerStreamManager;
     }
 }

@@ -4,13 +4,23 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class TrackerStreamManager {
-    public TrackerStreamManager(Socket socket) throws IOException {
-        // Run PeerInputManager
-        TrackerInputManager peerInputManager = new TrackerInputManager(socket);
-        peerInputManager.start();
-        // Run PeerOutputManager
-        TrackerOutputManager peerOutputManager = new TrackerOutputManager(socket);
-        peerOutputManager.start();
+    private final TrackerInputManager trackerInputManager;
+    private final TrackerOutputManager trackerOutputManager;
 
+    public TrackerStreamManager(Socket socket) throws IOException {
+        // Run PeerInputManager and PeerOutputManager
+        trackerInputManager = new TrackerInputManager(socket);
+        trackerOutputManager = new TrackerOutputManager(socket);
+
+        trackerInputManager.start();
+        trackerOutputManager.start();
+
+        trackerInputManager.addStreamManager(this);
+        trackerOutputManager.addStreamManager(this);
+    }
+
+    protected void handleOnDisconnected() {
+        trackerInputManager.interrupt();
+        trackerOutputManager.interrupt();
     }
 }
