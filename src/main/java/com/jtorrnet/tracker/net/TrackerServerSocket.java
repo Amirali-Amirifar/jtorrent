@@ -1,27 +1,27 @@
 package com.jtorrnet.tracker.net;
 
 import com.jtorrnet.tracker.net.peer_manager.TrackerStreamManager;
+import com.jtorrnet.tracker.state.StateManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class TrackerServerSocket extends ServerSocket {
 
-    Thread serverThread;
-    boolean running;
-    private final List<Socket> sockets = new ArrayList<>();
-
-    public TrackerServerSocket(int port) throws IOException {
+    private final Thread serverThread;
+    private final boolean running;
+    private final StateManager stateManager;
+    public TrackerServerSocket(int port, StateManager stateManager) throws IOException {
         super(port);
-        serverThread = new Thread(this::listen);
-        running = true;
+        this.stateManager = stateManager;
+        this.serverThread = new Thread(this::listen);
+        this.running = true;
     }
 
     public void startThreadAndListen() {
-        serverThread.start();
+        this.serverThread.start();
     }
 
     private void listen() {
@@ -29,9 +29,8 @@ public class TrackerServerSocket extends ServerSocket {
             System.out.println("Waiting for peers. ");
             try {
                 Socket peer = this.accept();
-                sockets.add(peer);
 
-                new TrackerStreamManager(peer); // todo persist in memory.
+                new TrackerStreamManager(peer, stateManager); // todo persist in memory.
 
                 System.out.println("Peer connected. " + peer);
             } catch (IOException e) {
