@@ -3,10 +3,10 @@ package com.jtorrnet.tracker.net.peer_manager;
 import java.io.IOException;
 import java.net.Socket;
 
-public class PeerManager {
-    public PeerManager(Socket socket) throws IOException {
+public class TrackerStreamManager {
+    public TrackerStreamManager(Socket socket) throws IOException {
         // Run PeerInputManager
-        PeerInputManager peerInputManager = new PeerInputManager(socket);
+        TrackerInputManager peerInputManager = new TrackerInputManager(socket);
         peerInputManager.start();
         // Run PeerOutputManager
 

@@ -1,12 +1,10 @@
 package com.jtorrnet.tracker.net;
 
-import com.jtorrnet.tracker.net.peer_manager.PeerInputManager;
-import com.jtorrnet.tracker.net.peer_manager.PeerManager;
+import com.jtorrnet.tracker.net.peer_manager.TrackerStreamManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 public class TrackerServerSocket extends ServerSocket {
 
@@ -28,7 +26,7 @@ public class TrackerServerSocket extends ServerSocket {
             System.out.println("Waiting for peers. ");
             try {
                 Socket peer = this.accept();
-                new PeerManager(peer); // todo persist in memory.
+                new TrackerStreamManager(peer); // todo persist in memory.
                 System.out.println("Peer connected. " + peer);
             } catch (IOException e) {
                 // TODO Auto-generated catch block

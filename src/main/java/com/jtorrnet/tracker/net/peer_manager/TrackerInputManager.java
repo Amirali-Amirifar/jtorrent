@@ -6,12 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class PeerInputManager extends Thread {
+public class TrackerInputManager extends Thread {
     private final Socket socket;
     private final InputStream socketInputStream;
     private final BufferedReader socketBufferedReader;
 
-    public PeerInputManager(Socket peer) throws IOException {
+    public TrackerInputManager(Socket peer) throws IOException {
         this.socket = peer;
         this.socketInputStream = peer.getInputStream();
         this.socketBufferedReader = new BufferedReader(new InputStreamReader(this.socketInputStream));
