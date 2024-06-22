@@ -51,7 +51,7 @@ public class TrackerStreamManager {
 
         if (msg.getRequestType().equals(RequestType.GET_PEERS)) {
             List<PeerModel> peers = stateManager.getPeers();
-            String[] list = peers.stream().map(peer -> peer.ip + ":" + peer.port).toArray(String[]::new);
+            String[] list = peers.stream().map(peer -> peer.name + " - " + peer.ip + ":" + peer.port).toArray(String[]::new);
             String body = String.join(" \\n", list);
 
             Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
@@ -61,8 +61,8 @@ public class TrackerStreamManager {
         if (msg.getRequestType().equals(RequestType.LIST_FILES)) {
             List<PeerModel> peers = stateManager.getPeers();
             String[] list = peers.stream().map(peer ->
-                    peer.ip + ":" + peer.port + "FILES \\n "
-                            + String.join("\\n", peer.files))
+                            peer.name + " - " + peer.ip + ":" + peer.port + " Has shared \\n "
+                                    + String.join("\\n", peer.files))
                     .toArray(String[]::new);
 
             String body = String.join(" \\n", list);
@@ -70,9 +70,15 @@ public class TrackerStreamManager {
             trackerOutputManager.sendMessage(newMessage.getMessage());
         }
 
-        if(msg.getRequestType().equals(RequestType.SHARE)) {
+        if (msg.getRequestType().equals(RequestType.SHARE)) {
             this.peerModel.files.add(msg.getBody());
             trackerOutputManager.sendMessage(msg.getMessage());
+        }
+
+        if (msg.getRequestType().equals(RequestType.SET_NAME)) {
+            this.peerModel.name = msg.getBody();
+            trackerOutputManager.sendMessage(msg.getMessage());
+
         }
 
     }

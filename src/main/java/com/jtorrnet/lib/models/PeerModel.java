@@ -7,6 +7,7 @@ public class PeerModel {
     public String ip;
     public String port;
     public List<String> files;
+    public String udpPort;
     public PeerModel(String name, String ip, String port, List<String> files) {
         this.name = name;
         this.ip = ip;

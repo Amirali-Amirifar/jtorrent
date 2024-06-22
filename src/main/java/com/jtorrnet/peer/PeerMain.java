@@ -34,7 +34,10 @@ public class PeerMain {
                 Message message = new Message(MessageType.REQUEST, RequestType.SHARE, command.substring(5));
                 socket.sendMessage(message.getMessage());
 
-            } else {
+            } else if(command.startsWith("set_name") ){
+                Message message=new Message(MessageType.REQUEST, RequestType.SET_NAME, command.split(" ")[1]);
+                socket.sendMessage(message.getMessage());
+            }else {
                 System.out.println("Invalid command");
                 continue;
             }

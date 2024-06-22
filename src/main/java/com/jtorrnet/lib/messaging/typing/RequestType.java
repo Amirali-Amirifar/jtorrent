@@ -6,5 +6,6 @@ public enum RequestType {
     KEEP_ALIVE,
     SHARE,
     GET,
-    LIST_FILES
+    LIST_FILES,
+    SET_NAME
 }
