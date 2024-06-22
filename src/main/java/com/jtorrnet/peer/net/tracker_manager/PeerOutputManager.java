@@ -1,5 +1,9 @@
 package com.jtorrnet.peer.net.tracker_manager;
 
+import com.jtorrnet.lib.messaging.Message;
+import com.jtorrnet.lib.messaging.typing.MessageType;
+import com.jtorrnet.lib.messaging.typing.RequestType;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -22,13 +26,18 @@ public class PeerOutputManager extends Thread {
         while (true) {
             try {
                 System.out.println("Writing...");
-                outputStreamWriter.println("I am connected, " + trackerSocket + " Time: " + new Date(System.currentTimeMillis()).getTime());
+                outputStreamWriter.println(new Message(MessageType.REQUEST, RequestType.KEEP_ALIVE, "").getMessage());
                 outputStreamWriter.flush();
-                Thread.sleep(5000);
+                Thread.sleep(20_000);
             } catch (InterruptedException e) {
                 System.out.println("Failed - " + e);
                 return;
             }
         }
+    }
+
+    public void sendMessage(String message) {
+        outputStreamWriter.println(message);
+        outputStreamWriter.flush();
     }
 }

@@ -6,10 +6,15 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class PeerTrackerSocket extends Socket {
+    PeerStreamManager peerStreamManager;
+
     public PeerTrackerSocket(String host, int port) throws IOException {
         super(host, port);
         System.out.println("Connected to " + host + ":" + port);
-        PeerStreamManager trackerManager = new PeerStreamManager(this);
+        peerStreamManager = new PeerStreamManager(this);
     }
 
+    public void sendMessage(String message) {
+        peerStreamManager.sendMessage(message);
+    }
 }

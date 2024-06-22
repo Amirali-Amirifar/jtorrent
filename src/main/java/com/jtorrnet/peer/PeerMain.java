@@ -1,8 +1,12 @@
 package com.jtorrnet.peer;
 
+import com.jtorrnet.lib.messaging.Message;
+import com.jtorrnet.lib.messaging.typing.MessageType;
+import com.jtorrnet.lib.messaging.typing.RequestType;
 import com.jtorrnet.peer.net.PeerTrackerSocket;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 public class PeerMain {
     public static void main(String[] args) throws IOException {
@@ -11,10 +15,18 @@ public class PeerMain {
         System.out.println("Attemtpting to connect to the peer");
         PeerTrackerSocket socket = new PeerTrackerSocket("127.0.0.1", 3000);
 
-        while (socket.isConnected()){
-            // wait;
 
+        String command = "";
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("SALAM");
+        while (!command.equals("exit")) {
+            command = scanner.nextLine();
+            command = command.toLowerCase().strip();
+            System.out.println("COMMAND: " + command);
+            if (command.equals("get_peers")) {
+                Message message = new Message(MessageType.REQUEST, RequestType.GET_PEERS, "");
+                socket.sendMessage(message.getMessage());
+            }
         }
-        System.out.println("Disconnected");
     }
 }

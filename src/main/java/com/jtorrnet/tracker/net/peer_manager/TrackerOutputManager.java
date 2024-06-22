@@ -23,9 +23,9 @@ public class TrackerOutputManager extends Thread{
         while(true) {
             try {
                 System.out.println("Writing...");
-                outputStreamWriter.println("I am connected, " + peerSocket + " Time: " + new Date(System.currentTimeMillis()).getTime());
+                outputStreamWriter.println("I am connected, " + peerSocket);
                 outputStreamWriter.flush();
-                Thread.sleep(5000);
+                Thread.sleep(20_000);
 
             } catch (InterruptedException e) {
                 System.out.println(e);
@@ -36,5 +36,9 @@ public class TrackerOutputManager extends Thread{
 
     public void addStreamManager(TrackerStreamManager trackerStreamManager) {
         this.trackerStreamManager = trackerStreamManager;
+    }
+    public void sendMessage(String message) {
+        outputStreamWriter.println(message);
+        outputStreamWriter.flush();
     }
 }
