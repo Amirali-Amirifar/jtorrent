@@ -48,14 +48,15 @@ public class PeerInputManager extends Thread {
     }
 
     private String cleanMessage(Message msg) {
-        if(msg.getType().equals(MessageType.RESPONSE)) {
-            if(msg.getRequestType().equals(RequestType.GET_PEERS)){
-                return "Here are all the peers in the network: \n" +
-                        msg.getBody().replace("\\n", "\n");
-            }
-        }
+        if (msg.getType().equals(MessageType.REQUEST))
+            return msg.getMessage();
 
-        return msg.getMessage();
+
+        if (msg.getRequestType().equals(RequestType.GET_PEERS) || msg.getRequestType().equals(RequestType.LIST_FILES))
+            return "Tracker said: \n" + msg.getBody().replace("\\n", "\n");
+
+
+        return "OOPS " + msg.getMessage();
     }
 
 

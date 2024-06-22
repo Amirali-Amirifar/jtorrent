@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class TrackerStreamManager {
     private final Socket peerSocket;
@@ -50,13 +49,30 @@ public class TrackerStreamManager {
 
         RequestType ansRequestType = msg.getRequestType();
 
-        if (msg.getRequestType() == RequestType.GET_PEERS) {
+        if (msg.getRequestType().equals(RequestType.GET_PEERS)) {
             List<PeerModel> peers = stateManager.getPeers();
-            String[] list = peers.stream().map(peer-> peer.ip + ":" +peer.port).toArray(String[]::new);
+            String[] list = peers.stream().map(peer -> peer.ip + ":" + peer.port).toArray(String[]::new);
             String body = String.join(" \\n", list);
 
-            Message newMessage = new Message(MessageType.RESPONSE, ansRequestType , body);
+            Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
             trackerOutputManager.sendMessage(newMessage.getMessage());
+            return;
+        }
+        if (msg.getRequestType().equals(RequestType.LIST_FILES)) {
+            List<PeerModel> peers = stateManager.getPeers();
+            String[] list = peers.stream().map(peer ->
+                    peer.ip + ":" + peer.port + "FILES \\n "
+                            + String.join("\\n", peer.files)
+                            + "\\n\\n").toArray(String[]::new);
+
+            String body = String.join(" \\n", list);
+            Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
+            trackerOutputManager.sendMessage(newMessage.getMessage());
+        }
+
+        if(msg.getRequestType().equals(RequestType.SHARE)) {
+            this.peerModel.files.add(msg.getBody());
+            trackerOutputManager.sendMessage(msg.getMessage());
         }
 
     }

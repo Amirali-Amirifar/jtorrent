@@ -25,7 +25,6 @@ public class PeerOutputManager extends Thread {
     public void run() {
         while (true) {
             try {
-                System.out.println("Writing...");
                 outputStreamWriter.println(new Message(MessageType.REQUEST, RequestType.KEEP_ALIVE, "").getMessage());
                 outputStreamWriter.flush();
                 Thread.sleep(20_000);
