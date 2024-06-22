@@ -55,7 +55,9 @@ public class PeerInputManager extends Thread {
         if (msg.getRequestType().equals(RequestType.GET_PEERS) || msg.getRequestType().equals(RequestType.LIST_FILES))
             return "Tracker said: \n" + msg.getBody().replace("\\n", "\n");
 
-
+        if(msg.getRequestType().equals(RequestType.GET)) {
+            return msg.getBody();
+        }
         return "OOPS " + msg.getMessage();
     }
 

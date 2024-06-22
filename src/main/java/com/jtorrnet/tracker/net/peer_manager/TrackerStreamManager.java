@@ -34,6 +34,7 @@ public class TrackerStreamManager {
 
         trackerInputManager.addStreamManager(this);
 
+        peerModel.trackerStreamManager = this;
         stateManager.addPeer(this.peerModel);
 
     }
@@ -51,10 +52,10 @@ public class TrackerStreamManager {
         if (msg.getRequestType().equals(RequestType.GET_PEERS)) {
             List<PeerModel> peers = stateManager.getPeers();
             String[] list = peers.stream().map(peer -> peer.name
-                    + " - "
-                    + peer.ip
-                    + ":"
-                    + peer.port)
+                            + " - "
+                            + peer.ip
+                            + ":"
+                            + peer.port)
                     .toArray(String[]::new);
 
             String body = String.join(" \\n", list);
@@ -71,7 +72,7 @@ public class TrackerStreamManager {
                             + " - "
                             + peer.ip
                             + ":"
-                            + peer.port
+                            + peer.port + "//UDP: " + peer.udpPort
                             + " Has shared \\n "
                             + String.join("\\n", peer.files))
                     .toArray(String[]::new);
@@ -92,6 +93,27 @@ public class TrackerStreamManager {
             trackerOutputManager.sendMessage(msg.getMessage());
 
         }
+        if (msg.getRequestType().equals(RequestType.UDPPORT)) {
+            this.peerModel.udpPort = msg.getBody();
+            trackerOutputManager.sendMessage(msg.getMessage());
+        }
 
+        if (msg.getRequestType().equals(RequestType.GET)) {
+            String[] args = msg.getBody().split("\\|");
+            String port = args[0];
+            String filename = args[1];
+            // Find which peer has such port and filename
+            List<PeerModel> seeder = stateManager.getPeers();
+            for (PeerModel se : seeder) {
+                if (se.udpPort.equals(port)) {
+                    String body = this.peerModel.udpPort + "|" + filename;
+                    System.out.println("FOUND PEER " + se);
+                    se.trackerStreamManager.trackerOutputManager.sendMessage(new Message(MessageType.REQUEST, RequestType.GET, body).getMessage());
+                    break;
+                }
+            }
+            System.out.println("Finished");
+
+        }
     }
 }

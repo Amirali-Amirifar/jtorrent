@@ -7,5 +7,6 @@ public enum RequestType {
     SHARE,
     GET,
     LIST_FILES,
-    SET_NAME
+    SET_NAME,
+    UDPPORT
 }
