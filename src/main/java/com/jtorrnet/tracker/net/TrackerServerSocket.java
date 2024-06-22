@@ -11,8 +11,10 @@ import java.net.Socket;
 public class TrackerServerSocket extends ServerSocket {
 
     private final Thread serverThread;
-    private final boolean running;
     private final StateManager stateManager;
+
+    private boolean running;
+
     public TrackerServerSocket(int port, StateManager stateManager) throws IOException {
         super(port);
         this.stateManager = stateManager;
@@ -24,17 +26,22 @@ public class TrackerServerSocket extends ServerSocket {
         this.serverThread.start();
     }
 
+    @Override
+    public void close() throws IOException {
+        super.close();
+        this.running = false;
+    }
+
     private void listen() {
         while (running) {
             System.out.println("Waiting for peers. ");
             try {
                 Socket peer = this.accept();
-
-                new TrackerStreamManager(peer, stateManager); // todo persist in memory.
+                new TrackerStreamManager(peer, stateManager);
 
                 System.out.println("Peer connected. " + peer);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                // noinspection CallToPrintStackTrace
                 e.printStackTrace();
             }
         }
