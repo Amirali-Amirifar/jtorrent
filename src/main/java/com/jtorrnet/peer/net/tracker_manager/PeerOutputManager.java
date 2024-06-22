@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.sql.Date;
 
 public class PeerOutputManager extends Thread {
     private final Socket trackerSocket;

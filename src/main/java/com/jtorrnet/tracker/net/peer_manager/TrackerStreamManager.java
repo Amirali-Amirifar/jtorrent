@@ -12,18 +12,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TrackerStreamManager {
-    private final Socket peerSocket;
     private final TrackerInputManager trackerInputManager;
     private final TrackerOutputManager trackerOutputManager;
     private final StateManager stateManager;
     private final PeerModel peerModel;
 
     public TrackerStreamManager(Socket socket, StateManager stateManager) throws IOException {
-        this.peerSocket = socket;
         this.stateManager = stateManager;
 
-        this.peerModel = new PeerModel("unnamed", peerSocket.getInetAddress().toString(),
-                String.valueOf(peerSocket.getPort()), new ArrayList<>());
+        this.peerModel = new PeerModel("unnamed",
+                socket.getInetAddress().toString(),
+                String.valueOf(socket.getPort()),
+                new ArrayList<>());
 
         // Run PeerInputManager and PeerOutputManager
         trackerInputManager = new TrackerInputManager(socket);
@@ -33,7 +33,6 @@ public class TrackerStreamManager {
         trackerOutputManager.start();
 
         trackerInputManager.addStreamManager(this);
-        trackerOutputManager.addStreamManager(this);
 
         stateManager.addPeer(this.peerModel);
 
@@ -51,21 +50,34 @@ public class TrackerStreamManager {
 
         if (msg.getRequestType().equals(RequestType.GET_PEERS)) {
             List<PeerModel> peers = stateManager.getPeers();
-            String[] list = peers.stream().map(peer -> peer.name + " - " + peer.ip + ":" + peer.port).toArray(String[]::new);
+            String[] list = peers.stream().map(peer -> peer.name
+                    + " - "
+                    + peer.ip
+                    + ":"
+                    + peer.port)
+                    .toArray(String[]::new);
+
             String body = String.join(" \\n", list);
 
             Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
             trackerOutputManager.sendMessage(newMessage.getMessage());
             return;
         }
+
         if (msg.getRequestType().equals(RequestType.LIST_FILES)) {
             List<PeerModel> peers = stateManager.getPeers();
-            String[] list = peers.stream().map(peer ->
-                            peer.name + " - " + peer.ip + ":" + peer.port + " Has shared \\n "
-                                    + String.join("\\n", peer.files))
+            String[] list = peers.stream()
+                    .map(peer -> peer.name
+                            + " - "
+                            + peer.ip
+                            + ":"
+                            + peer.port
+                            + " Has shared \\n "
+                            + String.join("\\n", peer.files))
                     .toArray(String[]::new);
 
             String body = String.join(" \\n", list);
+
             Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
             trackerOutputManager.sendMessage(newMessage.getMessage());
         }

@@ -30,6 +30,7 @@ public class TrackerServerSocket extends ServerSocket {
     public void close() throws IOException {
         super.close();
         this.running = false;
+        serverThread.interrupt();
     }
 
     private void listen() {
