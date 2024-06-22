@@ -62,8 +62,8 @@ public class TrackerStreamManager {
             List<PeerModel> peers = stateManager.getPeers();
             String[] list = peers.stream().map(peer ->
                     peer.ip + ":" + peer.port + "FILES \\n "
-                            + String.join("\\n", peer.files)
-                            + "\\n\\n").toArray(String[]::new);
+                            + String.join("\\n", peer.files))
+                    .toArray(String[]::new);
 
             String body = String.join(" \\n", list);
             Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);

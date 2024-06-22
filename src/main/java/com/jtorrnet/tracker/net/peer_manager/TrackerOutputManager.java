@@ -24,10 +24,7 @@ public class TrackerOutputManager extends Thread{
     public void run() {
         while(true) {
             try {
-                System.out.println("Writing...");
-
                 Thread.sleep(20_000);
-
             } catch (InterruptedException e) {
                 System.out.println(e);
                 return;
