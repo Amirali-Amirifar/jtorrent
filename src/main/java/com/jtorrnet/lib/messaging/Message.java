@@ -26,7 +26,6 @@ public class Message {
 
     public Message(String message) {
         String[] splitMessage = message.split("\\$");
-        System.out.println(Arrays.toString(splitMessage));
         this.type = MessageType.valueOf(splitMessage[0]);
         this.requestType = RequestType.valueOf(splitMessage[1]);
         this.body = splitMessage[2];

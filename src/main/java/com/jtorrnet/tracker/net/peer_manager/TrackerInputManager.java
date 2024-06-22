@@ -33,7 +33,7 @@ public class TrackerInputManager extends Thread {
                     throw new IOException("Disconnected from the socket. " + peerSocket);
 
 
-                System.out.println(peerSocket.getLocalPort() + " Has said " + message);
+                System.out.println(peerSocket.getPort() + " Has said " + message);
 
                 Message msg = new Message(message);
                 trackerStreamManager.handleMessage(msg);

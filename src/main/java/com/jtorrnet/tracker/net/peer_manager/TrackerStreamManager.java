@@ -47,12 +47,15 @@ public class TrackerStreamManager {
     }
 
     public void handleMessage(Message msg) {
+
+        RequestType ansRequestType = msg.getRequestType();
+
         if (msg.getRequestType() == RequestType.GET_PEERS) {
             List<PeerModel> peers = stateManager.getPeers();
             String[] list = peers.stream().map(peer-> peer.ip + ":" +peer.port).toArray(String[]::new);
-            String body = String.join("\n ", list);
+            String body = String.join(" \\n", list);
 
-            Message newMessage = new Message(MessageType.RESPONSE, RequestType.RESPONSE, body);
+            Message newMessage = new Message(MessageType.RESPONSE, ansRequestType , body);
             trackerOutputManager.sendMessage(newMessage.getMessage());
         }
 

@@ -1,5 +1,7 @@
 package com.jtorrnet.tracker.net.peer_manager;
 
+import com.jtorrnet.lib.messaging.Message;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -23,8 +25,7 @@ public class TrackerOutputManager extends Thread{
         while(true) {
             try {
                 System.out.println("Writing...");
-                outputStreamWriter.println("I am connected, " + peerSocket);
-                outputStreamWriter.flush();
+
                 Thread.sleep(20_000);
 
             } catch (InterruptedException e) {

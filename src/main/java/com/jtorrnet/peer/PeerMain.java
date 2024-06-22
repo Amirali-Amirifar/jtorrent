@@ -22,11 +22,12 @@ public class PeerMain {
         while (!command.equals("exit")) {
             command = scanner.nextLine();
             command = command.toLowerCase().strip();
-            System.out.println("COMMAND: " + command);
             if (command.equals("get_peers")) {
                 Message message = new Message(MessageType.REQUEST, RequestType.GET_PEERS, "");
                 socket.sendMessage(message.getMessage());
             }
+
+            System.out.println("COMMAND: " + command);
         }
     }
 }

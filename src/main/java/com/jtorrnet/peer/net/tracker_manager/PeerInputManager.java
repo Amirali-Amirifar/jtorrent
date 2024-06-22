@@ -1,5 +1,9 @@
 package com.jtorrnet.peer.net.tracker_manager;
 
+import com.jtorrnet.lib.messaging.Message;
+import com.jtorrnet.lib.messaging.typing.MessageType;
+import com.jtorrnet.lib.messaging.typing.RequestType;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +33,11 @@ public class PeerInputManager extends Thread {
                 if (line == null)
                     throw new IOException("Disconnected from the socket. " + trackerSocket);
 
-                System.out.println(trackerSocket.isClosed() + " Has said " + line);
+                Message msg = new Message(line);
+
+                String show = cleanMessage(msg);
+
+                System.out.println(show);
 
             } catch (IOException e) {
                 System.out.println("Warning: " + e);
@@ -37,6 +45,17 @@ public class PeerInputManager extends Thread {
             }
         }
         System.out.println("Info (PeerInputReader): disconnected from " + trackerSocket);
+    }
+
+    private String cleanMessage(Message msg) {
+        if(msg.getType().equals(MessageType.RESPONSE)) {
+            if(msg.getRequestType().equals(RequestType.GET_PEERS)){
+                return "Here are all the peers in the network: \n" +
+                        msg.getBody().replace("\\n", "\n");
+            }
+        }
+
+        return msg.getMessage();
     }
 
 
