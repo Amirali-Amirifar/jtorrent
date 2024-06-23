@@ -82,7 +82,7 @@ public class PeerMain {
                 System.out.println("Invalid command");
                 continue;
             }
-            System.out.println("COMMAND: " + command);
+//            System.out.println("COMMAND: " + command);
 
         }
     }

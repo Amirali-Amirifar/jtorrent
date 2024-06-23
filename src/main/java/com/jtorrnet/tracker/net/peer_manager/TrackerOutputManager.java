@@ -16,7 +16,6 @@ public class TrackerOutputManager {
 
 
     public void sendMessage(String message) {
-        System.out.println("Sending response");
         byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
         DatagramPacket packet1 = new DatagramPacket(bytes, bytes.length, packet.getAddress(), packet.getPort());
         try {
@@ -24,6 +23,5 @@ public class TrackerOutputManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("sent ");
     }
 }

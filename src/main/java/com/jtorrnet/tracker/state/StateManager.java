@@ -1,28 +1,30 @@
 package com.jtorrnet.tracker.state;
 
 import com.jtorrnet.lib.models.PeerModel;
-import com.jtorrnet.tracker.net.peer_manager.TrackerStreamManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class StateManager {
-    private final List<PeerModel> peers;
+    private final CopyOnWriteArrayList<PeerModel> peers;
 
     public StateManager() {
-        this.peers = new ArrayList<>();
+        this.peers = new CopyOnWriteArrayList<>();
     }
 
     public void addPeer(PeerModel peerModel) {
-        for(PeerModel pm : peers) {
-            if(pm.equals(peerModel)) {
+        for (PeerModel pm : peers) {
+            if (pm.equals(peerModel)) {
                 peers.remove(pm);
                 peers.add(peerModel);
                 return;
             }
         }
+        System.out.println("new peer connected. " + peerModel.ip + ":" + peerModel.port);
         peers.add(peerModel);
     }
+
     public void removePeer(PeerModel peerModel) {
         peers.remove(peerModel);
     }

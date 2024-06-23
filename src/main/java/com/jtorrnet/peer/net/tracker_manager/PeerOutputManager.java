@@ -10,12 +10,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class PeerOutputManager extends Thread {
-    private final Socket trackerSocket;
     private final OutputStream outputStream;
     private final PrintWriter outputStreamWriter;
 
     public PeerOutputManager(Socket tracker) throws IOException {
-        this.trackerSocket = tracker;
         this.outputStream = tracker.getOutputStream();
         this.outputStreamWriter = new PrintWriter(outputStream);
     }
@@ -32,10 +30,5 @@ public class PeerOutputManager extends Thread {
                 return;
             }
         }
-    }
-
-    public void sendMessage(String message) {
-        outputStreamWriter.println(message);
-        outputStreamWriter.flush();
     }
 }

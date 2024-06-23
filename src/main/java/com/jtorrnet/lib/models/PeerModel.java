@@ -9,7 +9,7 @@ public class PeerModel {
     public String ip;
     public String port;
     public List<String> files;
-    public String udpPort;
+    public String tcpPort;
     public TrackerStreamManager trackerStreamManager;
     public long lastInteraction;
 

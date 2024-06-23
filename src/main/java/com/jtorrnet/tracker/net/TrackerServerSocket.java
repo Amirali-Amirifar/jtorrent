@@ -44,14 +44,14 @@ public class TrackerServerSocket {
     }
 
     private void listen() {
+        System.out.println("Started Listening for UDP connections over port " + this.PORT);
+
         while (running) {
-            System.out.println("Waiting for peers. ");
             try {
                 DatagramPacket packet = getPackets();
 
                 new TrackerStreamManager(packet, socket, stateManager);
 
-                System.out.println("Peer connected. " + packet);
             } catch (IOException e) {
                 // noinspection CallToPrintStackTrace
                 e.printStackTrace();
@@ -60,30 +60,33 @@ public class TrackerServerSocket {
     }
 
     private void keepAlive() {
+        final int MIN_REQUEST_INTERVAL = 18_000;
+        final int TIMEOUT = 20_000;
+        final int THRESHOLD = TIMEOUT + MIN_REQUEST_INTERVAL + 2_000;
+
+        System.out.println("Started Keep Alive Thread");
+
         while (true) {
-            System.out.println("Running keep alive reqs");
             synchronized (stateManager.getPeers()) {
                 for (PeerModel peer : stateManager.getPeers()) {
-                    if (-peer.lastInteraction + System.currentTimeMillis() > 10_000) {
-                        System.out.println(peer.name + peer.port + " last interacted in " + (System.currentTimeMillis() - peer.lastInteraction));
+                    if (-peer.lastInteraction + System.currentTimeMillis() > MIN_REQUEST_INTERVAL) {
                         peer.trackerStreamManager
                                 .trackerOutputManager
                                 .sendMessage(new Message(MessageType.REQUEST, RequestType.KEEP_ALIVE, "")
                                         .getMessage());
-                        System.out.println("Sent request to " + peer.name + " port " + peer.port);
                     }
                 }
             }
             try {
-                Thread.sleep(7000);
+                Thread.sleep(TIMEOUT);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             // remove unavailable peers
             synchronized (stateManager.getPeers()) {
-                List<PeerModel> remove = new ArrayList<PeerModel>();
+                List<PeerModel> remove = new ArrayList<>();
                 for (PeerModel peer : stateManager.getPeers()) {
-                    if (System.currentTimeMillis() - peer.lastInteraction > 20_000) {
+                    if (System.currentTimeMillis() - peer.lastInteraction > THRESHOLD) {
                         remove.add(peer);
                     }
                 }
@@ -105,22 +108,7 @@ public class TrackerServerSocket {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String msg = new String(buffer, StandardCharsets.UTF_8);
-        msg = msg.substring(0, msg.indexOf("EOF"));
-        System.out.println(msg);
         return packet;
-    }
-
-
-    private int getPort() {
-        try {
-            ServerSocket ss = new ServerSocket(0);
-            int port = ss.getLocalPort();
-            ss.close();
-            return port;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

@@ -17,11 +17,12 @@ public class PeerTrackerSocket {
     private final int PORT;
     private final DatagramSocket socket;
     private final boolean running;
+    private final int DestPort = 3000;
     PeerStreamManager peerStreamManager;
     Thread serverThread;
-    private final int DestPort = 3000;
+
     public PeerTrackerSocket(String host, int port) throws IOException {
-        System.out.println("Connected to " + host + ":" + port);
+        System.out.println("Connected to " + host + ":" + DestPort);
         this.PORT = port;
         this.serverThread = new Thread(this::listen);
         this.running = true;
@@ -33,7 +34,7 @@ public class PeerTrackerSocket {
     }
 
     public void sendMessage(String message) throws IOException {
-        DatagramPacket gotoTracker = new DatagramPacket(message.getBytes(),message.getBytes().length,
+        DatagramPacket gotoTracker = new DatagramPacket(message.getBytes(), message.getBytes().length,
                 InetAddress.getByName("localhost"),
                 3000);
 
@@ -46,7 +47,6 @@ public class PeerTrackerSocket {
 
     private void listen() {
         while (running) {
-            System.out.println("Waiting for a message from tracker... ");
 
             DatagramPacket packet = getPackets();
 
@@ -66,6 +66,10 @@ public class PeerTrackerSocket {
         if (msg.getRequestType().equals(RequestType.GET)) {
             return msg.getBody();
         }
+        if (msg.getRequestType().equals(RequestType.KEEP_ALIVE))
+            return "KEEP-ALIVE REQUESTED";
+
+
         return "OOPS " + msg.getMessage();
     }
 
@@ -76,9 +80,11 @@ public class PeerTrackerSocket {
         _msg = _msg.substring(0, _msg.indexOf("EOF"));
         Message msg = new Message(_msg);
 
-        System.out.println(cleanMessage(msg));
+        _msg = cleanMessage(msg);
+        _msg = _msg.replace("$", " ");
+        System.out.println((_msg));
 
-        if(msg.getType().equals(MessageType.REQUEST) && msg.getRequestType().equals(RequestType.KEEP_ALIVE)) {
+        if (msg.getType().equals(MessageType.REQUEST) && msg.getRequestType().equals(RequestType.KEEP_ALIVE)) {
             try {
                 sendMessage(new Message(MessageType.RESPONSE, RequestType.KEEP_ALIVE, "Hello world").getMessage());
             } catch (IOException e) {

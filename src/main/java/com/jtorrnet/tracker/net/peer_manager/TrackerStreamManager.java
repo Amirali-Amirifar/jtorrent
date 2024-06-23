@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class TrackerStreamManager {
     //    private final TrackerInputManager trackerInputManager;
@@ -32,36 +33,26 @@ public class TrackerStreamManager {
         }
 
         if (peerModel == null) {
-            this.peerModel = new PeerModel("unnamed",
+            this.peerModel = new PeerModel("unnamed" + new Random().nextInt(100),
                     packet.getAddress().toString(),
                     String.valueOf(packet.getPort()),
                     new ArrayList<>());
         }
-        // Run PeerInputManager and PeerOutputManager
-//        trackerInputManager = new TrackerInputManager(socket);
-        trackerOutputManager = new TrackerOutputManager(packet, datagramSocket);
-//
-//        trackerInputManager.start();
-//        trackerOutputManager.start();
 
-//        trackerInputManager.addStreamManager(this);
+
+        trackerOutputManager = new TrackerOutputManager(packet, datagramSocket);
 
         peerModel.trackerStreamManager = this;
+
         stateManager.addPeer(this.peerModel);
 
         // convert packet to string
         String message = new String(packet.getData(), 0, packet.getLength());
-        System.out.println("Peer connected. " + message);
         this.handleMessage(message);
 
 
     }
 
-//    protected void handleOnDisconnected() {
-//        trackerInputManager.interrupt();
-//        trackerOutputManager.interrupt();
-//        stateManager.removePeer(this.peerModel);
-//    }
 
     public void handleMessage(String message) {
         Message msg = new Message(message);
@@ -69,13 +60,13 @@ public class TrackerStreamManager {
     }
 
     public void handleMessage(Message msg) {
-        System.out.println("Handling msg");
+        System.out.println(this.peerModel.name + "/" + this.peerModel.port + " - " +
+                msg.getMessage().replace("$", " ").substring(0, msg.getMessage().length() - 3));
         RequestType ansRequestType = msg.getRequestType();
         this.peerModel.lastInteraction = System.currentTimeMillis();
 
         if (msg.getRequestType().equals(RequestType.KEEP_ALIVE)) {
             trackerOutputManager.sendMessage(msg.getMessage());
-            System.out.println("got keep alive from " + this.peerModel.name + " port " + this.peerModel.port);
             return;
         }
         if (msg.getRequestType().equals(RequestType.GET_PEERS)) {
@@ -101,8 +92,8 @@ public class TrackerStreamManager {
                             + " - "
                             + peer.ip
                             + ":"
-                            + peer.port + "//UDP: " + peer.udpPort
-                            + " Has shared \\n "
+                            + peer.port + " With P2P TCP Port: " + peer.tcpPort
+                            + " - Seeds: \\n"
                             + String.join("\\n", peer.files))
                     .toArray(String[]::new);
 
@@ -110,21 +101,25 @@ public class TrackerStreamManager {
 
             Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
             trackerOutputManager.sendMessage(newMessage.getMessage());
+            return;
         }
 
         if (msg.getRequestType().equals(RequestType.SHARE)) {
-            this.peerModel.files.add(msg.getBody());
+            this.peerModel.files.add(msg.getBody().strip());
             trackerOutputManager.sendMessage(msg.getMessage());
+            return;
         }
 
         if (msg.getRequestType().equals(RequestType.SET_NAME)) {
             this.peerModel.name = msg.getBody();
             trackerOutputManager.sendMessage(msg.getMessage());
-
+            return;
         }
         if (msg.getRequestType().equals(RequestType.UDPPORT)) {
-            this.peerModel.udpPort = msg.getBody();
+            this.peerModel.tcpPort = msg.getBody();
             trackerOutputManager.sendMessage(msg.getMessage());
+
+            return;
         }
 
         if (msg.getRequestType().equals(RequestType.GET)) {
@@ -134,14 +129,13 @@ public class TrackerStreamManager {
             // Find which peer has such port and filename
             List<PeerModel> seeder = stateManager.getPeers();
             for (PeerModel se : seeder) {
-                if (se.udpPort.equals(port)) {
-                    String body = this.peerModel.udpPort + "|" + filename;
+                if (se.tcpPort.equals(port)) {
+                    String body = this.peerModel.tcpPort + "|" + filename;
                     System.out.println("FOUND PEER " + se);
                     se.trackerStreamManager.trackerOutputManager.sendMessage(new Message(MessageType.REQUEST, RequestType.GET, body).getMessage());
                     break;
                 }
             }
-            System.out.println("Finished");
 
         }
     }
