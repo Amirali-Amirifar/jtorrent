@@ -7,5 +7,5 @@ public enum RequestType {
     GET,
     LIST_FILES,
     SET_NAME,
-    UDPPORT
+    TCP_PORT
 }

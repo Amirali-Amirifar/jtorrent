@@ -16,12 +16,10 @@ import java.util.Random;
 public class TrackerStreamManager {
     public final TrackerOutputManager trackerOutputManager;
     private final StateManager stateManager;
-    private final DatagramSocket socket;
     private PeerModel peerModel;
 
-    public TrackerStreamManager(DatagramPacket packet, DatagramSocket datagramSocket, StateManager stateManager) throws IOException {
+    public TrackerStreamManager(DatagramPacket packet, DatagramSocket datagramSocket, StateManager stateManager) {
         this.stateManager = stateManager;
-        this.socket = datagramSocket;
 
         // see if exists:
         for (PeerModel pm : stateManager.getPeers()) {
@@ -31,12 +29,12 @@ public class TrackerStreamManager {
             }
         }
 
-        if (peerModel == null) {
+        if (peerModel == null)
             this.peerModel = new PeerModel("unnamed" + new Random().nextInt(100),
                     packet.getAddress().toString(),
                     String.valueOf(packet.getPort()),
                     new ArrayList<>());
-        }
+
 
 
         trackerOutputManager = new TrackerOutputManager(packet, datagramSocket);
@@ -82,7 +80,7 @@ public class TrackerStreamManager {
                 this.peerModel.name = msg.getBody();
                 trackerOutputManager.sendMessage(msg);
                 break;
-            case UDPPORT:
+            case TCP_PORT:
                 this.peerModel.tcpPort = msg.getBody();
                 trackerOutputManager.sendMessage(msg);
                 break;
@@ -127,7 +125,8 @@ public class TrackerStreamManager {
 
         String body = String.join(" \\n", list);
 
-        Message newMessage = new Message(MessageType.RESPONSE, RequestType.LIST_FILES, body);
+        Message newMessage
+                = new Message(MessageType.RESPONSE, RequestType.LIST_FILES, body);
         trackerOutputManager.sendMessage(newMessage);
     }
 
