@@ -57,6 +57,13 @@ public class PeerTrackerSocket {
             return "Tracker said: \n" + msg.getBody().replace("\\n", "\n");
 
         if (msg.getRequestType().equals(RequestType.GET)) {
+            String[] args = msg.getBody().split("\\|");
+            PeerDownloader peerDownloader = new PeerDownloader(Integer.valueOf(args[0]));
+            try {
+                peerDownloader.receiveFile(args[0]);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             return msg.getBody();
         }
         if (msg.getRequestType().equals(RequestType.KEEP_ALIVE))
