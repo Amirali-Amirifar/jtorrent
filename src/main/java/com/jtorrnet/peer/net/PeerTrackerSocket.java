@@ -3,7 +3,6 @@ package com.jtorrnet.peer.net;
 import com.jtorrnet.lib.messaging.Message;
 import com.jtorrnet.lib.messaging.typing.MessageType;
 import com.jtorrnet.lib.messaging.typing.RequestType;
-import com.jtorrnet.peer.net.tracker_manager.PeerStreamManager;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -14,36 +13,33 @@ import java.nio.charset.StandardCharsets;
 public class PeerTrackerSocket {
 
     private final int BUFFER_SIZE = 1024;
-    private final int PORT;
     private final DatagramSocket socket;
     private final boolean running;
     private final int DestPort = 3000;
-    PeerStreamManager peerStreamManager;
     Thread serverThread;
 
     public PeerTrackerSocket(String host, int port) throws IOException {
         System.out.println("Connected to " + host + ":" + DestPort);
-        this.PORT = port;
         this.serverThread = new Thread(this::listen);
         this.running = true;
         this.socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
 
-        serverThread.start();
+        Message udpPortMessg = new Message(MessageType.REQUEST, RequestType.KEEP_ALIVE, "initialize connection");
+        sendMessage(udpPortMessg.getMessage());
 
-        //        peerStreamManager = new PeerStreamManager(this);
+
+        serverThread.start();
     }
 
     public void sendMessage(String message) throws IOException {
         DatagramPacket gotoTracker = new DatagramPacket(message.getBytes(), message.getBytes().length,
                 InetAddress.getByName("localhost"),
-                3000);
+                DestPort);
 
         socket.send(gotoTracker);
     }
 
-    public void startThreadAndListen() {
-        this.serverThread.start();
-    }
+
 
     private void listen() {
         while (running) {
@@ -105,14 +101,4 @@ public class PeerTrackerSocket {
     }
 
 
-//    private int getPort() {
-//        try {
-//            ServerSocket ss = new ServerSocket(0);
-//            int port = ss.getLocalPort();
-//            ss.close();
-//            return port;
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 }
