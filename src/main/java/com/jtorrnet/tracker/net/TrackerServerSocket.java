@@ -20,7 +20,6 @@ public class TrackerServerSocket {
     private static final int BUFFER_SIZE = 1024;
     private final int PORT;
     private final DatagramSocket socket;
-    private final boolean running;
     Thread serverThread;
     Thread keepAliveThread;
 
@@ -30,7 +29,6 @@ public class TrackerServerSocket {
         this.serverThread = new Thread(this::listen);
         this.keepAliveThread = new Thread(this::keepAlive);
 
-        this.running = true;
 
         this.socket = new DatagramSocket(port);
 
@@ -44,18 +42,13 @@ public class TrackerServerSocket {
     private void listen() {
         System.out.println("Started Listening for UDP connections over port " + this.PORT);
 
-        while (running) {
-            try {
-                // Wait until a packet arrives.
-                DatagramPacket packet = getPackets();
+        while (true) {
+            // Wait until a packet arrives.
+            DatagramPacket packet = getPackets();
 
-                // Handle the packet and send response back while maintaining the state of the server.
-                new TrackerStreamManager(packet, socket, stateManager);
+            // Handle the packet and send response back while maintaining the state of the server.
+            new TrackerStreamManager(packet, socket, stateManager);
 
-            } catch (IOException e) {
-                // noinspection CallToPrintStackTrace
-                e.printStackTrace();
-            }
         }
     }
 
