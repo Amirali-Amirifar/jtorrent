@@ -3,8 +3,6 @@ package com.jtorrnet.lib.messaging;
 import com.jtorrnet.lib.messaging.typing.MessageType;
 import com.jtorrnet.lib.messaging.typing.RequestType;
 
-import java.util.Arrays;
-
 public class Message {
     // Message contruction
     /*

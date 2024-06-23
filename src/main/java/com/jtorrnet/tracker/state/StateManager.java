@@ -15,13 +15,13 @@ public class StateManager {
 
     public void addPeer(PeerModel peerModel) {
         for (PeerModel pm : peers) {
-            if (pm.equals(peerModel)) {
+            if (pm.isIpAndPortEqual(peerModel)) {
                 peers.remove(pm);
                 peers.add(peerModel);
                 return;
             }
         }
-        System.out.println("new peer connected. " + peerModel.ip + ":" + peerModel.port);
+        System.out.println("new peer connected. " + peerModel.getIp() + ":" + peerModel.getPort());
         peers.add(peerModel);
     }
 
@@ -36,7 +36,7 @@ public class StateManager {
     public List<String> getFiles() {
         List<String> files = new ArrayList<>();
         for (PeerModel peer : peers) {
-            files.addAll(peer.files);
+            files.addAll(peer.getFiles());
         }
         return files;
     }

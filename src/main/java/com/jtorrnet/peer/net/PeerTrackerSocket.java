@@ -12,14 +12,14 @@ import java.nio.charset.StandardCharsets;
 
 public class PeerTrackerSocket {
 
-    private final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 1024;
+    private static final int TRACKER_PORT = 3000;
     private final DatagramSocket socket;
     private final boolean running;
-    private final int DestPort = 3000;
     Thread serverThread;
 
     public PeerTrackerSocket(String host, int port) throws IOException {
-        System.out.println("Connected to " + host + ":" + DestPort);
+        System.out.println("Connected to " + host + ":" + TRACKER_PORT);
         this.serverThread = new Thread(this::listen);
         this.running = true;
         this.socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
@@ -34,26 +34,26 @@ public class PeerTrackerSocket {
     public void sendMessage(String message) throws IOException {
         DatagramPacket gotoTracker = new DatagramPacket(message.getBytes(), message.getBytes().length,
                 InetAddress.getByName("localhost"),
-                DestPort);
+                TRACKER_PORT);
 
         socket.send(gotoTracker);
+    }
+    public void sendMessage(Message msg) throws IOException {
+        sendMessage(msg.getMessage());
     }
 
 
     private void listen() {
-        while (running) {
-
+        while (true) {
             DatagramPacket packet = getPackets();
-
             handleResponse(packet);
-
         }
     }
 
     private String cleanMessage(Message msg) {
 
-
-        if (msg.getRequestType().equals(RequestType.GET_PEERS) || msg.getRequestType().equals(RequestType.LIST_FILES))
+        if (msg.getRequestType().equals(RequestType.GET_PEERS)
+                || msg.getRequestType().equals(RequestType.LIST_FILES))
             return "Tracker said: \n" + msg.getBody().replace("\\n", "\n");
 
         if (msg.getRequestType().equals(RequestType.GET)) {
@@ -76,12 +76,13 @@ public class PeerTrackerSocket {
         _msg = cleanMessage(msg);
         _msg = _msg.replace("$", " ");
 
-        if(!_msg.isEmpty())
+        if (!_msg.isEmpty())
             System.out.println((_msg));
 
-        if (msg.getType().equals(MessageType.REQUEST) && msg.getRequestType().equals(RequestType.KEEP_ALIVE)) {
+        if (msg.getType().equals(MessageType.REQUEST)
+                && msg.getRequestType().equals(RequestType.KEEP_ALIVE)) {
             try {
-                sendMessage(new Message(MessageType.RESPONSE, RequestType.KEEP_ALIVE, "Hello world").getMessage());
+                sendMessage(new Message(MessageType.RESPONSE, RequestType.KEEP_ALIVE, "Hello world"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

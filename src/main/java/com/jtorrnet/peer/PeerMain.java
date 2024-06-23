@@ -7,12 +7,10 @@ import com.jtorrnet.peer.net.PeerTrackerSocket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class PeerMain {
-    static int getRandomPort() {
+    static int getRandomPort() throws IOException {
         try {
             ServerSocket ss = new ServerSocket(0);
             int port = ss.getLocalPort();
@@ -20,7 +18,7 @@ public class PeerMain {
             System.out.println("Available port is " + port);
             return port;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IOException("Couldn't find a local port.");
         }
     }
 
@@ -59,7 +57,7 @@ public class PeerMain {
             } else if (command.startsWith("set_name")) {
                 Message message = new Message(MessageType.REQUEST, RequestType.SET_NAME, command.split(" ")[1]);
                 socket.sendMessage(message.getMessage());
-            }  else if (command.startsWith("get")) {
+            } else if (command.startsWith("get")) {
                 // get filename.fmt port
                 String[] args = command.split(" ");
                 String filename = args[1];

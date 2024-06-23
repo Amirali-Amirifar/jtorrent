@@ -17,7 +17,7 @@ import java.util.List;
 public class TrackerServerSocket {
 
     private final StateManager stateManager;
-    private final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 1024;
     private final int PORT;
     private final DatagramSocket socket;
     private final boolean running;
@@ -69,8 +69,8 @@ public class TrackerServerSocket {
         while (true) {
             synchronized (stateManager.getPeers()) {
                 for (PeerModel peer : stateManager.getPeers()) {
-                    if (System.currentTimeMillis() - peer.lastInteraction > MIN_REQUEST_INTERVAL) {
-                        peer.trackerStreamManager
+                    if (System.currentTimeMillis() - peer.getLastInteraction() > MIN_REQUEST_INTERVAL) {
+                        peer.getTrackerStreamManager()
                                 .trackerOutputManager
                                 .sendMessage(new Message(MessageType.REQUEST, RequestType.KEEP_ALIVE, ""));
                     }
@@ -79,21 +79,22 @@ public class TrackerServerSocket {
             try {
                 Thread.sleep(TIMEOUT);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                System.out.println("Keep Alive InterruptedException");
+                Thread.currentThread().interrupt();
             }
             // remove unavailable peers
             synchronized (stateManager.getPeers()) {
                 List<PeerModel> remove = new ArrayList<>();
                 for (PeerModel peer : stateManager.getPeers()) {
-                    if (System.currentTimeMillis() - peer.lastInteraction > THRESHOLD) {
+                    if (System.currentTimeMillis() - peer.getLastInteraction() > THRESHOLD) {
                         remove.add(peer);
                     }
                 }
 
                 for (PeerModel peer : remove) {
                     stateManager.removePeer(peer);
-                    System.out.println("Removed peer " + peer.name + " port " + peer.port + " becase last interaction in "
-                            + (System.currentTimeMillis() - peer.lastInteraction) + "ms");
+                    System.out.println("Removed peer " + peer.getName() + " port " + peer.getPort() + " becase last interaction in "
+                            + (System.currentTimeMillis() - peer.getLastInteraction()) + "ms");
                 }
             }
         }
