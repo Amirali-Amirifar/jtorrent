@@ -5,13 +5,26 @@ import com.jtorrnet.lib.messaging.typing.MessageType;
 import com.jtorrnet.lib.messaging.typing.RequestType;
 import com.jtorrnet.peer.net.PeerTrackerSocket;
 import com.jtorrnet.peer.net.udp_server.UDPManager;
+import com.jtorrnet.tracker.net.peer_manager.TrackerStreamManager;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class PeerMain {
+    static int getRandomPort() {
+        try {
+            ServerSocket ss = new ServerSocket(0);
+            int port = ss.getLocalPort();
+            ss.close();
+            System.out.println("Available port is " + port);
+            return port;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public static void main(String[] argsv) throws IOException {
         // P2P server
 //        runUDPServer();
@@ -19,8 +32,9 @@ public class PeerMain {
 
         // Peer-Tracker handshake.
         // Start Peer client.
+
         System.out.println("Attemtpting to connect to the peer");
-        PeerTrackerSocket socket = new PeerTrackerSocket("127.0.0.1", 3000);
+        PeerTrackerSocket socket = new PeerTrackerSocket("127.0.0.1", getRandomPort());
 
         UDPManager udpManager = new UDPManager();
 

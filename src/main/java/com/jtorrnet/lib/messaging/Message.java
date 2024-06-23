@@ -28,7 +28,9 @@ public class Message {
         String[] splitMessage = message.split("\\$");
         this.type = MessageType.valueOf(splitMessage[0]);
         this.requestType = RequestType.valueOf(splitMessage[1]);
-        this.body = splitMessage[2];
+        if (splitMessage.length >= 3)
+            this.body = splitMessage[2];
+        else this.body = "";
     }
 
     public String getMessage() {

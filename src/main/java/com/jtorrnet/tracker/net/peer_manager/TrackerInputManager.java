@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class TrackerInputManager extends Thread {
-    private final Socket peerSocket;
+    private final  Socket peerSocket;
     private final BufferedReader socketBufferedReader;
     private TrackerStreamManager trackerStreamManager;
 
@@ -44,7 +44,7 @@ public class TrackerInputManager extends Thread {
             }
         }
 
-        trackerStreamManager.handleOnDisconnected();
+//        trackerStreamManager.handleOnDisconnected();
     }
 
     public void addStreamManager(TrackerStreamManager trackerStreamManager) {

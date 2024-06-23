@@ -1,32 +1,29 @@
 package com.jtorrnet.tracker.net.peer_manager;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.nio.charset.StandardCharsets;
 
-public class TrackerOutputManager extends Thread{
-    private final PrintWriter outputStreamWriter;
+public class TrackerOutputManager {
+    DatagramSocket socket;
+    DatagramPacket packet;
 
-    public TrackerOutputManager(Socket peerSocket) throws IOException {
-        OutputStream outputStream = peerSocket.getOutputStream();
-        this.outputStreamWriter = new PrintWriter(outputStream);
+    public TrackerOutputManager(DatagramPacket packet, DatagramSocket socket) {
+        this.packet = packet;
+        this.socket = socket;
     }
 
-    @Override
-    public void run() {
-        while(true) {
-            try {
-                Thread.sleep(20_000);
-            } catch (InterruptedException e) {
-                this.interrupt();
-                return;
-            }
-        }
-    }
 
     public void sendMessage(String message) {
-        outputStreamWriter.println(message);
-        outputStreamWriter.flush();
+        System.out.println("Sending response");
+        byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
+        DatagramPacket packet1 = new DatagramPacket(bytes, bytes.length, packet.getAddress(), packet.getPort());
+        try {
+            socket.send(packet1);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("sent ");
     }
 }

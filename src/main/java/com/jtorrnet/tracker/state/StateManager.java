@@ -1,6 +1,7 @@
 package com.jtorrnet.tracker.state;
 
 import com.jtorrnet.lib.models.PeerModel;
+import com.jtorrnet.tracker.net.peer_manager.TrackerStreamManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,13 @@ public class StateManager {
     }
 
     public void addPeer(PeerModel peerModel) {
+        for(PeerModel pm : peers) {
+            if(pm.equals(peerModel)) {
+                peers.remove(pm);
+                peers.add(peerModel);
+                return;
+            }
+        }
         peers.add(peerModel);
     }
     public void removePeer(PeerModel peerModel) {
@@ -30,4 +38,5 @@ public class StateManager {
         }
         return files;
     }
+
 }
