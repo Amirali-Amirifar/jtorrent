@@ -40,7 +40,6 @@ public class PeerTrackerSocket {
     }
 
 
-
     private void listen() {
         while (running) {
 
@@ -52,8 +51,6 @@ public class PeerTrackerSocket {
     }
 
     private String cleanMessage(Message msg) {
-        if (msg.getType().equals(MessageType.REQUEST))
-            return msg.getMessage();
 
 
         if (msg.getRequestType().equals(RequestType.GET_PEERS) || msg.getRequestType().equals(RequestType.LIST_FILES))
@@ -63,10 +60,10 @@ public class PeerTrackerSocket {
             return msg.getBody();
         }
         if (msg.getRequestType().equals(RequestType.KEEP_ALIVE))
-            return "KEEP-ALIVE REQUESTED";
+            return "";
 
 
-        return "OOPS " + msg.getMessage();
+        return msg.getMessage();
     }
 
 
@@ -78,7 +75,9 @@ public class PeerTrackerSocket {
 
         _msg = cleanMessage(msg);
         _msg = _msg.replace("$", " ");
-        System.out.println((_msg));
+
+        if(!_msg.isEmpty())
+            System.out.println((_msg));
 
         if (msg.getType().equals(MessageType.REQUEST) && msg.getRequestType().equals(RequestType.KEEP_ALIVE)) {
             try {

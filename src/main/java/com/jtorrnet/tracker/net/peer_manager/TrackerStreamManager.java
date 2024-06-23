@@ -65,28 +65,33 @@ public class TrackerStreamManager {
         System.out.println(this.peerModel.name + "/" + this.peerModel.port + " - " +
                 msg.getMessage().replace("$", " ").substring(0, msg.getMessage().length() - 3));
 
-        RequestType ansRequestType = msg.getRequestType();
         this.peerModel.lastInteraction = System.currentTimeMillis();
 
-
-        if (msg.getRequestType().equals(RequestType.KEEP_ALIVE)) {
-            trackerOutputManager.sendMessage(msg);
-        } else if (msg.getRequestType().equals(RequestType.GET_PEERS)) {
-            handleGetPeersMsg(ansRequestType);
-        } else if (msg.getRequestType().equals(RequestType.LIST_FILES)) {
-            handleListFilesMsg(ansRequestType);
-        } else if (msg.getRequestType().equals(RequestType.SHARE)) {
-            this.peerModel.files.add(msg.getBody().strip());
-            trackerOutputManager.sendMessage(msg);
-        } else if (msg.getRequestType().equals(RequestType.SET_NAME)) {
-            this.peerModel.name = msg.getBody();
-            trackerOutputManager.sendMessage(msg);
-        } else if (msg.getRequestType().equals(RequestType.UDPPORT)) {
-            this.peerModel.tcpPort = msg.getBody();
-            trackerOutputManager.sendMessage(msg);
-
-        } else if (msg.getRequestType().equals(RequestType.GET)) {
-            handleGetFileMsg(msg);
+        switch(msg.getRequestType()){
+            case GET_PEERS:
+                handleGetPeersMsg();
+                break;
+            case LIST_FILES:
+                handleListFilesMsg();
+                break;
+            case SHARE:
+                this.peerModel.files.add(msg.getBody().strip());
+                trackerOutputManager.sendMessage(msg);
+                break;
+            case SET_NAME:
+                this.peerModel.name = msg.getBody();
+                trackerOutputManager.sendMessage(msg);
+                break;
+            case UDPPORT:
+                this.peerModel.tcpPort = msg.getBody();
+                trackerOutputManager.sendMessage(msg);
+                break;
+            case GET:
+                handleGetFileMsg(msg);
+                break;
+            case KEEP_ALIVE:
+                trackerOutputManager.sendMessage(msg);
+                break;
         }
     }
 
@@ -108,7 +113,7 @@ public class TrackerStreamManager {
         }
     }
 
-    private void handleListFilesMsg(RequestType ansRequestType) {
+    private void handleListFilesMsg() {
         List<PeerModel> peers = stateManager.getPeers();
         String[] list = peers.stream()
                 .map(peer -> peer.name
@@ -116,17 +121,17 @@ public class TrackerStreamManager {
                         + peer.ip
                         + ":"
                         + peer.port + " With P2P TCP Port: " + peer.tcpPort
-                        + " - Seeds: \\n"
-                        + String.join("\\n", peer.files))
+                        + " - Seeds: \\n -- "
+                        + String.join("\\n -- ", peer.files))
                 .toArray(String[]::new);
 
         String body = String.join(" \\n", list);
 
-        Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
+        Message newMessage = new Message(MessageType.RESPONSE, RequestType.LIST_FILES, body);
         trackerOutputManager.sendMessage(newMessage);
     }
 
-    private void handleGetPeersMsg(RequestType ansRequestType) {
+    private void handleGetPeersMsg() {
         List<PeerModel> peers = stateManager.getPeers();
         String[] list = peers.stream().map(peer -> peer.name
                         + " - "
@@ -137,7 +142,7 @@ public class TrackerStreamManager {
 
         String body = String.join(" \\n", list);
 
-        Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
+        Message newMessage = new Message(MessageType.RESPONSE, RequestType.GET_PEERS, body);
         trackerOutputManager.sendMessage(newMessage);
     }
 }
