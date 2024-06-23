@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Random;
 
 public class TrackerStreamManager {
-    //    private final TrackerInputManager trackerInputManager;
     public final TrackerOutputManager trackerOutputManager;
     private final StateManager stateManager;
     private final DatagramSocket socket;
@@ -49,8 +48,6 @@ public class TrackerStreamManager {
         // convert packet to string
         String message = new String(packet.getData(), 0, packet.getLength());
         this.handleMessage(message);
-
-
     }
 
 
@@ -59,84 +56,88 @@ public class TrackerStreamManager {
         handleMessage(msg);
     }
 
+    /**
+     * Get the message which peer has sent, process and return another message in response.
+     *
+     * @param msg Message object received by the server from peer.
+     */
     public void handleMessage(Message msg) {
         System.out.println(this.peerModel.name + "/" + this.peerModel.port + " - " +
                 msg.getMessage().replace("$", " ").substring(0, msg.getMessage().length() - 3));
+
         RequestType ansRequestType = msg.getRequestType();
         this.peerModel.lastInteraction = System.currentTimeMillis();
 
+
         if (msg.getRequestType().equals(RequestType.KEEP_ALIVE)) {
-            trackerOutputManager.sendMessage(msg.getMessage());
-            return;
-        }
-        if (msg.getRequestType().equals(RequestType.GET_PEERS)) {
-            List<PeerModel> peers = stateManager.getPeers();
-            String[] list = peers.stream().map(peer -> peer.name
-                            + " - "
-                            + peer.ip
-                            + ":"
-                            + peer.port)
-                    .toArray(String[]::new);
-
-            String body = String.join(" \\n", list);
-
-            Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
-            trackerOutputManager.sendMessage(newMessage.getMessage());
-            return;
-        }
-
-        if (msg.getRequestType().equals(RequestType.LIST_FILES)) {
-            List<PeerModel> peers = stateManager.getPeers();
-            String[] list = peers.stream()
-                    .map(peer -> peer.name
-                            + " - "
-                            + peer.ip
-                            + ":"
-                            + peer.port + " With P2P TCP Port: " + peer.tcpPort
-                            + " - Seeds: \\n"
-                            + String.join("\\n", peer.files))
-                    .toArray(String[]::new);
-
-            String body = String.join(" \\n", list);
-
-            Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
-            trackerOutputManager.sendMessage(newMessage.getMessage());
-            return;
-        }
-
-        if (msg.getRequestType().equals(RequestType.SHARE)) {
+            trackerOutputManager.sendMessage(msg);
+        } else if (msg.getRequestType().equals(RequestType.GET_PEERS)) {
+            handleGetPeersMsg(ansRequestType);
+        } else if (msg.getRequestType().equals(RequestType.LIST_FILES)) {
+            handleListFilesMsg(ansRequestType);
+        } else if (msg.getRequestType().equals(RequestType.SHARE)) {
             this.peerModel.files.add(msg.getBody().strip());
-            trackerOutputManager.sendMessage(msg.getMessage());
-            return;
-        }
-
-        if (msg.getRequestType().equals(RequestType.SET_NAME)) {
+            trackerOutputManager.sendMessage(msg);
+        } else if (msg.getRequestType().equals(RequestType.SET_NAME)) {
             this.peerModel.name = msg.getBody();
-            trackerOutputManager.sendMessage(msg.getMessage());
-            return;
-        }
-        if (msg.getRequestType().equals(RequestType.UDPPORT)) {
+            trackerOutputManager.sendMessage(msg);
+        } else if (msg.getRequestType().equals(RequestType.UDPPORT)) {
             this.peerModel.tcpPort = msg.getBody();
-            trackerOutputManager.sendMessage(msg.getMessage());
+            trackerOutputManager.sendMessage(msg);
 
-            return;
+        } else if (msg.getRequestType().equals(RequestType.GET)) {
+            handleGetFileMsg(msg);
         }
+    }
 
-        if (msg.getRequestType().equals(RequestType.GET)) {
-            String[] args = msg.getBody().split("\\|");
-            String port = args[0];
-            String filename = args[1];
-            // Find which peer has such port and filename
-            List<PeerModel> seeder = stateManager.getPeers();
-            for (PeerModel se : seeder) {
-                if (se.tcpPort.equals(port)) {
-                    String body = this.peerModel.tcpPort + "|" + filename;
-                    System.out.println("FOUND PEER " + se);
-                    se.trackerStreamManager.trackerOutputManager.sendMessage(new Message(MessageType.REQUEST, RequestType.GET, body).getMessage());
-                    break;
-                }
+
+    private void handleGetFileMsg(Message msg) {
+        String[] args = msg.getBody().split("\\|");
+        String port = args[0];
+        String filename = args[1];
+        // Find which peer has such port and filename
+        List<PeerModel> seeder = stateManager.getPeers();
+        for (PeerModel se : seeder) {
+            if (se.tcpPort.equals(port)) {
+                String body = this.peerModel.tcpPort + "|" + filename;
+                System.out.println("FOUND PEER " + se);
+                se.trackerStreamManager.trackerOutputManager
+                        .sendMessage(new Message(MessageType.REQUEST, RequestType.GET, body));
+                break;
             }
-
         }
+    }
+
+    private void handleListFilesMsg(RequestType ansRequestType) {
+        List<PeerModel> peers = stateManager.getPeers();
+        String[] list = peers.stream()
+                .map(peer -> peer.name
+                        + " - "
+                        + peer.ip
+                        + ":"
+                        + peer.port + " With P2P TCP Port: " + peer.tcpPort
+                        + " - Seeds: \\n"
+                        + String.join("\\n", peer.files))
+                .toArray(String[]::new);
+
+        String body = String.join(" \\n", list);
+
+        Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
+        trackerOutputManager.sendMessage(newMessage);
+    }
+
+    private void handleGetPeersMsg(RequestType ansRequestType) {
+        List<PeerModel> peers = stateManager.getPeers();
+        String[] list = peers.stream().map(peer -> peer.name
+                        + " - "
+                        + peer.ip
+                        + ":"
+                        + peer.port)
+                .toArray(String[]::new);
+
+        String body = String.join(" \\n", list);
+
+        Message newMessage = new Message(MessageType.RESPONSE, ansRequestType, body);
+        trackerOutputManager.sendMessage(newMessage);
     }
 }

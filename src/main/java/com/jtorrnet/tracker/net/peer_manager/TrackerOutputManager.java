@@ -1,5 +1,7 @@
 package com.jtorrnet.tracker.net.peer_manager;
 
+import com.jtorrnet.lib.messaging.Message;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -23,5 +25,9 @@ public class TrackerOutputManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void sendMessage(Message msg) {
+        sendMessage(msg.getMessage());
     }
 }

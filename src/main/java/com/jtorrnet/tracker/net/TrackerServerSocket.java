@@ -10,8 +10,6 @@ import com.jtorrnet.tracker.state.StateManager;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +46,10 @@ public class TrackerServerSocket {
 
         while (running) {
             try {
+                // Wait until a packet arrives.
                 DatagramPacket packet = getPackets();
 
+                // Handle the packet and send response back while maintaining the state of the server.
                 new TrackerStreamManager(packet, socket, stateManager);
 
             } catch (IOException e) {
@@ -69,11 +69,10 @@ public class TrackerServerSocket {
         while (true) {
             synchronized (stateManager.getPeers()) {
                 for (PeerModel peer : stateManager.getPeers()) {
-                    if (-peer.lastInteraction + System.currentTimeMillis() > MIN_REQUEST_INTERVAL) {
+                    if (System.currentTimeMillis() - peer.lastInteraction > MIN_REQUEST_INTERVAL) {
                         peer.trackerStreamManager
                                 .trackerOutputManager
-                                .sendMessage(new Message(MessageType.REQUEST, RequestType.KEEP_ALIVE, "")
-                                        .getMessage());
+                                .sendMessage(new Message(MessageType.REQUEST, RequestType.KEEP_ALIVE, ""));
                     }
                 }
             }
